@@ -12,15 +12,17 @@ public  class Sender implements Runnable {
     private Session session;
     private String destination;
     private int howManyToSend;
+    private String messageText;
 
-    public Sender(Session initSession, String initDestination, int initHowManyToSend) {
+    public Sender(Session initSession, String initDestination, int initHowManyToSend, String initText) {
         this.session = initSession;
         this.destination = initDestination;
         howManyToSend = initHowManyToSend;
+        messageText = initText;
     }
 
-    public Sender(Session initSession, String initDestination) {
-        this(initSession, initDestination, 10 );
+    public Sender(Session initSession, String initDestination ) {
+        this(initSession, initDestination, 10, "a message" );
     }
 
     public void run() {
@@ -29,7 +31,7 @@ public  class Sender implements Runnable {
             long counter = 0;
 
             while (counter < howManyToSend) {
-                TextMessage message = session.createTextMessage("Message " + ++counter);
+                TextMessage message = session.createTextMessage(messageText + ":" + ++counter);
                 message.setJMSMessageID(UUID.randomUUID().toString());
                 messageProducer.send(message);
                 System.out.printf("Sent %d: %s%n", counter, message);

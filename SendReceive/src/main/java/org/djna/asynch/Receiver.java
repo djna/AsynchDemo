@@ -25,9 +25,14 @@ public  class Receiver implements Runnable, MessageListener {
     public void onMessage(Message message) {
         try {
             System.out.println(String.format("received message '%s' with message id '%s'", ((TextMessage) message).getText(), message.getJMSMessageID()));
-            System.out.println("Message:" + message);
 
-            message.acknowledge();
+            if ( ((TextMessage) message).getText().startsWith("bad")) {
+                System.out.println("Commit, Message:" + message);
+                session.rollback();
+            } else {
+                System.out.println("Rollback, Message:" + message);
+                session.commit();
+            }
         } catch (JMSException e) {
             throw new RuntimeException(e);
         }

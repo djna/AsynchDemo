@@ -13,7 +13,7 @@ public class AsychMain {
         if (args.length >= 1){
             clientId = args[0];
         }
-        System.out.printf("ClientId %s%n", clientId);
+        System.out.printf("Queue Name %s%n", clientId);
 
         if (args.length > 2){
             queueName = args[1];
@@ -27,11 +27,16 @@ public class AsychMain {
         conn.start();
 
         int howManyToSend = 5;
+        String messageText = "Message from sender";
         boolean receive = true;
 
         if (args.length >= 3) {
             try {
-                howManyToSend = Integer.valueOf(args[2]);
+                String[] sendConfigItems = args[2].split("=");
+                if (sendConfigItems.length > 1){
+                    messageText = sendConfigItems[1];
+                }
+                howManyToSend = Integer.valueOf(sendConfigItems[0]);
             } catch (NumberFormatException nfe) {
                 usageExit("Number of messages to send, not a valid number");
             }
@@ -41,17 +46,18 @@ public class AsychMain {
         }
 
         if (howManyToSend > 0) {
-            System.out.printf("Sending %d messages%n", howManyToSend);
+            System.out.printf("Sending %d messages {%s} %n", howManyToSend, messageText);
             new Thread(new Sender(
                     conn.createSession(false, Session.CLIENT_ACKNOWLEDGE),
-                    "Queue.PointToPoint.OneWay.Traditional",
-                    howManyToSend)
+                    queueName,
+                    howManyToSend,
+                    messageText)
                   ).start();
 
         }
         if ( receive) {
-            new Thread(new Receiver(conn.createSession(false,
-                    Session.CLIENT_ACKNOWLEDGE),
+            new Thread(new Receiver(conn.createSession(true,
+                    Session.SESSION_TRANSACTED),
                     queueName)).start();
         }
     }
