@@ -9,10 +9,17 @@ import javax.jms.Session;
 public class AsychMain {
     public static void main(String[] args) throws Exception {
         String clientId = "Example";
-        if (args.length > 0){
+        String queueName = "Queue.PointToPoint.OneWay.Traditional";
+        if (args.length >= 1){
             clientId = args[0];
         }
         System.out.printf("ClientId %s%n", clientId);
+
+        if (args.length > 2){
+            queueName = args[1];
+        }
+        System.out.printf("ClientId %s%n", queueName);
+
         ActiveMQConnectionFactory connFact = new ActiveMQConnectionFactory("tcp://localhost:61616");
         connFact.setConnectResponseTimeout(10000);
         Connection conn = connFact.createConnection("admin", "admin");
@@ -22,19 +29,15 @@ public class AsychMain {
         int howManyToSend = 5;
         boolean receive = true;
 
-        if (args.length < 2) {
-            howManyToSend = 5;
-            receive = true;
-        }
-        if (args.length >= 2) {
+        if (args.length >= 3) {
             try {
-                howManyToSend = Integer.valueOf(args[1]);
+                howManyToSend = Integer.valueOf(args[2]);
             } catch (NumberFormatException nfe) {
                 usageExit("Number of messages to send, not a valid number");
             }
         }
-        if (args.length >= 3) {
-            receive = ("receive".equalsIgnoreCase(args[2]));
+        if (args.length >= 4) {
+            receive = ("receive".equalsIgnoreCase(args[3]));
         }
 
         if (howManyToSend > 0) {
@@ -47,8 +50,9 @@ public class AsychMain {
 
         }
         if ( receive) {
-            System.out.printf("Receiving messages%n");
-            new Thread(new Receiver(conn.createSession(false, Session.CLIENT_ACKNOWLEDGE), "Queue.PointToPoint.OneWay.Traditional")).start();
+            new Thread(new Receiver(conn.createSession(false,
+                    Session.CLIENT_ACKNOWLEDGE),
+                    queueName)).start();
         }
     }
 

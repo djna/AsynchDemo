@@ -15,6 +15,7 @@ public  class Receiver implements Runnable, MessageListener {
     public void run() {
         try {
             MessageConsumer consumer = session.createConsumer(session.createQueue(destination));
+            System.out.printf("Receiving from %s%n", destination);
             consumer.setMessageListener(this);
         } catch (JMSException e) {
             throw new RuntimeException(e);
@@ -24,6 +25,8 @@ public  class Receiver implements Runnable, MessageListener {
     public void onMessage(Message message) {
         try {
             System.out.println(String.format("received message '%s' with message id '%s'", ((TextMessage) message).getText(), message.getJMSMessageID()));
+            System.out.println("Message:" + message);
+
             message.acknowledge();
         } catch (JMSException e) {
             throw new RuntimeException(e);
