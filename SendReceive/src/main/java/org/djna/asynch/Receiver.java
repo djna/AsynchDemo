@@ -4,8 +4,8 @@ import javax.jms.*;
 
 public  class Receiver implements Runnable, MessageListener {
 
-    private Session session;
-    private String destination;
+    protected Session session;
+    protected String destination;
 
     public Receiver(Session session, String destination) {
         this.session = session;
