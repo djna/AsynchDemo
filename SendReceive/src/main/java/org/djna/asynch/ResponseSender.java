@@ -6,10 +6,11 @@ import javax.jms.*;
 import java.util.UUID;
 import javax.jms.Connection;
 
-
+/*
+ * Listens on a request queue and sends correlated responses
+ */
 public  class ResponseSender extends Receiver
 {
-
 
     private Session session;
     private String sendDestination;
@@ -18,6 +19,9 @@ public  class ResponseSender extends Receiver
     private static String requestQueueName = "ask";
 
     public static void main(String[] args) throws Exception{
+        if (args.length > 0 && args[0].length() > 0 ){
+            requestQueueName = args[0];
+        }
         ActiveMQConnectionFactory connFact = new ActiveMQConnectionFactory("tcp://localhost:61616");
         connFact.setConnectResponseTimeout(10000);
         Connection conn = connFact.createConnection("admin", "admin");
@@ -31,7 +35,9 @@ public  class ResponseSender extends Receiver
     public ResponseSender(Session initSession, String receiveDestination) throws JMSException {
         super(initSession, receiveDestination );
         session = initSession;
+
         sendDestination = receiveDestination+"RespQ";
+        System.out.printf("Listen on %s, reply to %s", receiveDestination, sendDestination);
 
         messageProducer = session.createProducer(session.createQueue(sendDestination));
     }
