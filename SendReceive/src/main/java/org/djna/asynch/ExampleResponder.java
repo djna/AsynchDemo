@@ -54,10 +54,12 @@ public class ExampleResponder implements MessageListener {
 
     public void onMessage(Message message) {
         try {
+            System.out.printf("Received %s %n", message);
             TextMessage response = this.session.createTextMessage();
             if (message instanceof TextMessage) {
                 TextMessage txtMsg = (TextMessage) message;
                 String messageText = txtMsg.getText();
+                System.out.printf("Replying to %s %n", messageText);
                 response.setText(this.messageProtocol.handleProtocolMessage(messageText));
             }
 
