@@ -12,7 +12,6 @@ import javax.jms.Connection;
 public  class ResponseSender extends Receiver
 {
 
-    private Session session;
     private String sendDestination;
     private MessageProducer messageProducer;
     private static String clientId = "ResponseSender";
@@ -27,30 +26,38 @@ public  class ResponseSender extends Receiver
         Connection conn = connFact.createConnection("admin", "admin");
         conn.setClientID(clientId);
         conn.start();
-        Session session = conn.createSession(true,
+        Session receiveSession = conn.createSession(true,
                                     Session.SESSION_TRANSACTED);
-        new Thread(new ResponseSender(session,
+        new Thread(new ResponseSender(receiveSession,
                                       requestQueueName)).start();
     }
     public ResponseSender(Session initSession, String receiveDestination) throws JMSException {
         super(initSession, receiveDestination );
-        session = initSession;
-
+        // separate connection for sending - had issues with transaction and non-transaction sessions
+        ActiveMQConnectionFactory connFact = new ActiveMQConnectionFactory("tcp://localhost:61616");
+        connFact.setConnectResponseTimeout(10000);
+        Connection conn = connFact.createConnection("admin", "admin");
+        conn.setClientID(clientId+"SendRespnse");
+        conn.start();
+        Session sendSession = conn.createSession(true,
+                Session.CLIENT_ACKNOWLEDGE);
         sendDestination = receiveDestination+"RespQ";
-        System.out.printf("Listen on %s, reply to %s", receiveDestination, sendDestination);
+        System.out.printf("Listen on %s, reply to %s%n", receiveDestination, sendDestination);
 
-        messageProducer = session.createProducer(session.createQueue(sendDestination));
+        messageProducer = sendSession.createProducer(session.createQueue(sendDestination));
     }
 
     public void sendResponse(TextMessage receivedMessage) throws JMSException {
         String receivedText = receivedMessage.getText();
-        TextMessage message = session.createTextMessage( "response:" + receivedText + ":no");
+        String responseText = "response:" + receivedText + ":no";
+        TextMessage message = session.createTextMessage( responseText);
         message.setJMSMessageID(UUID.randomUUID().toString());
         message.setJMSCorrelationID(message.getJMSMessageID());
         messageProducer.send(message);
-        System.out.printf("Sent  %s%n", message);
+        System.out.printf("Sent %s %s%n", responseText, message);
     }
 
+    @Override
     public void onMessage(Message message) {
         try {
             System.out.println(String.format("received message '%s' with message id '%s'", ((TextMessage) message).getText(), message.getJMSMessageID()));

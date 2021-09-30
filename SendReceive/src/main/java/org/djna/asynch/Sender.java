@@ -1,10 +1,7 @@
 package org.djna.asynch;
 
 import javax.jms.*;
-import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 
 public  class Sender implements Runnable {
@@ -15,13 +12,12 @@ public  class Sender implements Runnable {
     private int howManyToSend;
     private String messageText;
     private String responseDestination;
-    private ResponseReceiver responseReceiver;
+    private Requester responseReceiver;
 
     public Sender(Session initSession, String initDestination, int initHowManyToSend, String initText) {
         this.session = initSession;
         this.destination = initDestination;
         this.responseDestination = initDestination + "RespQ";
-        responseReceiver = new ResponseReceiver(initSession, responseDestination, this);
         howManyToSend = initHowManyToSend;
         messageText = initText;
     }
@@ -47,9 +43,6 @@ public  class Sender implements Runnable {
         }
     }
 
-    public void processResponse(Message responseMessage) throws Exception{
-        throw new Exception("not a clue");
-    }
 }
 
 
