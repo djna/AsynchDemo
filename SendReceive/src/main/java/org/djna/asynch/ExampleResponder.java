@@ -45,7 +45,7 @@ public class ExampleResponder implements MessageListener {
             this.replyProducer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 
             //Set up a consumer to consume messages off of the admin queue
-            MessageConsumer consumer = this.session.createConsumer(adminQueue);
+            MessageConsumer consumer = this.session.createConsumer(adminQueue, "JMSPriority > 5");
             consumer.setMessageListener(this);
         } catch (JMSException e) {
             System.out.printf("Exception %s%n", e);
@@ -70,7 +70,13 @@ public class ExampleResponder implements MessageListener {
 
             //Send the response to the Destination specified by the JMSReplyTo field of the received message,
             //this is presumably a temporary queue created by the client
-            this.replyProducer.send(message.getJMSReplyTo(), response);
+            Destination replyTo = message.getJMSReplyTo();
+            if ( replyTo == null){
+                System.out.printf("No reply to specifed, cannot respond ");
+            } else {
+                this.replyProducer.send(replyTo, response);
+            }
+
         } catch (JMSException e) {
             System.out.printf("Exception %s%n", e);
         }

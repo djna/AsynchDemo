@@ -3,6 +3,8 @@ package org.djna.asynch;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 import javax.jms.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 public class ExampleRequester implements MessageListener {
@@ -11,6 +13,7 @@ public class ExampleRequester implements MessageListener {
 
     private boolean transacted = false;
     private MessageProducer producer;
+    private Map<String, Message> correlationMap;
 
     static {
         clientQueueName = "client.messages";
@@ -18,6 +21,7 @@ public class ExampleRequester implements MessageListener {
     }
 
     public ExampleRequester() {
+        correlationMap = new HashMap<>();
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
         Connection connection;
         try {
@@ -54,9 +58,12 @@ public class ExampleRequester implements MessageListener {
             //message to the server you would presumably want to associate the correlation ID with this
             //message somehow...a Map works good
             String correlationId = this.createRandomString();
+            correlationMap.put(correlationId, txtMessage);
             txtMessage.setJMSCorrelationID(correlationId);
-            System.out.printf("sending %s to %s%n",correlationId, clientQueueName);
-            this.producer.send(txtMessage);
+
+            System.out.printf("sending %s to %s%n", correlationId, clientQueueName);
+
+            this.producer.send(txtMessage, DeliveryMode.NON_PERSISTENT, 8, 60 * 1000);
         } catch (JMSException e) {
             System.out.printf("Exception %s%n", e);
         }
@@ -72,6 +79,13 @@ public class ExampleRequester implements MessageListener {
         String messageText = null;
         try {
             System.out.println("reply message received" + message);
+            Message requestMessage = correlationMap.get(message.getJMSCorrelationID());
+            if ( requestMessage == null){
+                System.out.printf("Unexpected message, %s%n", message.getJMSCorrelationID());
+            } else{
+                System.out.printf("Response to %s%n", requestMessage);
+            }
+
             if (message instanceof TextMessage) {
                 TextMessage textMessage = (TextMessage) message;
                 messageText = textMessage.getText();
