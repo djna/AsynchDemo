@@ -22,7 +22,8 @@ public class ExampleRequester implements MessageListener {
 
     public ExampleRequester() {
         correlationMap = new HashMap<>();
-        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+        ActiveMQConnectionFactory connectionFactory
+                = new ActiveMQConnectionFactory("tcp://localhost:61616");
         Connection connection;
         try {
             connection = connectionFactory.createConnection();
