@@ -7,9 +7,11 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="SendReceive" />
+        <module name="AsynchDemo" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="AsynchDemo" target="1.5" />
       <module name="SendReceive" target="16" />
     </bytecodeTargetLevel>
   </component>

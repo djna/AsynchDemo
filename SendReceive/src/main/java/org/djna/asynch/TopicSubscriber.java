@@ -17,7 +17,9 @@ public class TopicSubscriber {
     }
 
     public static class HelloWorldConsumer implements Runnable, ExceptionListener {
+        public boolean stopping = false;
         public void run() {
+
             try {
                 ActiveMQConnectionFactory connectionFactory
                         = new ActiveMQConnectionFactory("tcp://localhost:61616");
@@ -29,14 +31,16 @@ public class TopicSubscriber {
                 MessageConsumer consumer = session.createConsumer(destination);
 
                 System.out.println("Subscribed: " + destination);
-                Message message = consumer.receive(60 *1000);
+                while ( ! stopping ) {
+                    Message message = consumer.receive(120 * 1000);
 
-                if (message instanceof TextMessage) {
-                    TextMessage textMessage = (TextMessage) message;
-                    String text = textMessage.getText();
-                    System.out.println("Received: " + text);
-                } else {
-                    System.out.println("Received: " + message);
+                    if (message instanceof TextMessage) {
+                        TextMessage textMessage = (TextMessage) message;
+                        String text = textMessage.getText();
+                        System.out.println("Received: " + text);
+                    } else {
+                        System.out.println("Received: " + message);
+                    }
                 }
 
                 consumer.close();
