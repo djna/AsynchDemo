@@ -24,11 +24,12 @@ public class TopicSubscriber {
                 ActiveMQConnectionFactory connectionFactory
                         = new ActiveMQConnectionFactory("tcp://localhost:61616");
                 Connection connection = connectionFactory.createConnection();
+                connection.setClientID("HomeMonitor");
                 connection.start();
                 connection.setExceptionListener(this);
                 Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-                Destination destination = session.createTopic("home.thermostats");
-                MessageConsumer consumer = session.createConsumer(destination);
+                Topic destination = session.createTopic("home.thermostats");
+                MessageConsumer consumer = session.createDurableSubscriber(destination, "Thermostats");
 
                 System.out.println("Subscribed: " + destination);
                 while ( ! stopping ) {
