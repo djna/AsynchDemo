@@ -1,10 +1,12 @@
-package org.djna.asynch.home.monitor;
+package org.djna.asynch.estate.monitor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.djna.asynch.home.data.ThermostatReading;
+import org.djna.asynch.estate.data.ThermostatReading;
 
 import javax.jms.*;
+import java.util.ArrayList;
+import java.util.List;
 
 // Estate Monitor
 // Subscribes to all topics and displays each message
@@ -38,6 +40,7 @@ public class EstateMonitor {
                 Topic destination = session.createTopic("home.thermostats.>");
                 MessageConsumer consumer = session.createDurableSubscriber(destination, "Thermostats");
                 ObjectMapper mapper = new ObjectMapper();
+
 
                 System.out.println("Subscribed: " + destination);
 

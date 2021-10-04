@@ -1,10 +1,10 @@
-package org.djna.asynch.home.emulator;
+package org.djna.asynch.estate.emulator;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.log4j.Logger;
-import org.djna.asynch.home.data.ThermostatReading;
+import org.djna.asynch.estate.data.ThermostatReading;
 
 import javax.jms.*;
 import java.text.MessageFormat;
