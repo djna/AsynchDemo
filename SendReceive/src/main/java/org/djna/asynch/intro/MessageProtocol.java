@@ -1,4 +1,4 @@
-package org.djna.asynch;
+package org.djna.asynch.intro;
 
 public class MessageProtocol {
     public String handleProtocolMessage(String messageText) {

@@ -1,4 +1,4 @@
-package org.djna.asynch;
+package org.djna.asynch.intro;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 

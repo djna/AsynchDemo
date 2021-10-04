@@ -1,10 +1,8 @@
-package org.djna.asynch;
+package org.djna.asynch.homeemulator;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.activemq.command.ActiveMQMessage;
-import org.apache.catalina.filters.RemoteIpFilter;
 import org.apache.log4j.Logger;
 import org.djna.asynch.homedata.ThermostatReading;
 
@@ -12,38 +10,48 @@ import javax.jms.*;
 import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
 
+// Emulates Telemetry from multiple devices.
+// Starts a thread per emualted device, each publishing to a separate topic
+// and each publishing at a specified rate. Cycles through a range of values.
 public class TopicPublisher {
     private static final Logger LOGGER = Logger.getLogger(TopicPublisher.class);
     private final static String baseTopic = "home.thermostats";
 
     public static void main(String[] args) throws Exception {
+        // verify that logging is correctly configured in logback.xml
         LOGGER.error("Test Error");
         LOGGER.info("Starting");
+        // usually don't enable to see this, debug from libraries is versbose
         LOGGER.debug("debug message");
-        startWork(makePublisher("101","hall", 60), false);
-        startWork(makePublisher("101","basement", 25), false);
+
+        // example devices
+        startWork(makeDevice("101","hall", 60), false);
+        startWork(makeDevice("101","basement", 25), false);
     }
 
-    public static void startWork(Runnable runnable, boolean daemon) {
-        Thread brokerThread = new Thread(runnable);
-        brokerThread.setDaemon(daemon);
-        brokerThread.start();
+    // starts thread for specified emulator
+    public static void startWork(Runnable deviceEmulator, boolean daemon) {
+        Thread deviceThread = new Thread(deviceEmulator);
+        deviceThread.setDaemon(daemon);
+        deviceThread.start();
     }
 
-    public static Runnable makePublisher(String property, String location, final int frequencySeconds) {
+    // Device factory
+    public static Runnable makeDevice(String property, String location, final int frequencySeconds) {
         return new Runnable() {
+            // each device establishes its own connection
+            // as an enhancement we could start and stop them indepdently
             private ActiveMQConnectionFactory connectionFactory;
             private Connection connection;
             private Session session;
             private Destination destination;
             private MessageProducer producer;
 
+            // currently we just run forever, but this is our shutdown flag
             private boolean stopping = false;
-
 
             @Override
             public void run() {
-
                 try {
                    connectionFactory
                             = new ActiveMQConnectionFactory("tcp://localhost:61616");
@@ -66,12 +74,13 @@ public class TopicPublisher {
                     // TODO - add capability for clean shutdown
                     while (! stopping) {
                         publishTemperature(baseTemperature +temperatureSkew );
+
+                        // prepare next values
                         temperatureSkew++;
                         temperatureSkew %= 15;
 
                         // good citizen check
                         int sleepFor =  frequencySeconds < 15 ? 15 : frequencySeconds;
-
                         TimeUnit.SECONDS.sleep(sleepFor);
                     }
 
@@ -85,6 +94,8 @@ public class TopicPublisher {
 
             private void publishTemperature( int temperature ) throws JMSException, JsonProcessingException {
                 ThermostatReading reading = new ThermostatReading(temperature, location);
+
+                // publish jSON
                 ObjectMapper mapper = new ObjectMapper();
                 String text = mapper.writeValueAsString(reading);;
                 TextMessage message = session.createTextMessage(text);
