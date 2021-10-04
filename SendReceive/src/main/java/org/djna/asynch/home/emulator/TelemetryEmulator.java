@@ -1,10 +1,10 @@
-package org.djna.asynch.homeemulator;
+package org.djna.asynch.home.emulator;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.log4j.Logger;
-import org.djna.asynch.homedata.ThermostatReading;
+import org.djna.asynch.home.data.ThermostatReading;
 
 import javax.jms.*;
 import java.text.MessageFormat;
@@ -13,8 +13,8 @@ import java.util.concurrent.TimeUnit;
 // Emulates Telemetry from multiple devices.
 // Starts a thread per emualted device, each publishing to a separate topic
 // and each publishing at a specified rate. Cycles through a range of values.
-public class TopicPublisher {
-    private static final Logger LOGGER = Logger.getLogger(TopicPublisher.class);
+public class TelemetryEmulator {
+    private static final Logger LOGGER = Logger.getLogger(TelemetryEmulator.class);
     private final static String baseTopic = "home.thermostats";
 
     public static void main(String[] args) throws Exception {

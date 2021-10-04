@@ -1,4 +1,4 @@
-package org.djna.asynch.homeapp;
+package org.djna.asynch.home.webapp;
 
 
 import org.apache.log4j.Logger;

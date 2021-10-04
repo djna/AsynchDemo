@@ -1,4 +1,4 @@
-package org.djna.asynch.homedata;
+package org.djna.asynch.home.data;
 
 import java.util.Date;
 
@@ -11,6 +11,14 @@ public class ThermostatReading {
         date = new Date();
         temperature = initTemperature;
         location = initLocation;
+    }
+
+    // Jackson parser requries a zero-arg constructor
+    // values are later set correctly when JSON is parsed
+    public ThermostatReading(){
+        date = new Date();
+        temperature = 0;
+        location = "unknown";
     }
 
     public Date getDate() {
