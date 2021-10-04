@@ -1,0 +1,56 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Getting Started: Serving Web Content</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+</head>
+<body>
+<p th:text="'Hello, ' + ${name} + '!'" />
+<p id="WeatherTimestamp">No Updates</p>
+<p id="WeatherWarning">No news is good news</p>
+</body>
+<script>
+    $(document).ready(function(){
+
+         console.log("Loaded");
+
+         setInterval(fetchWeatherStatus, 10 * 1000);
+    });
+
+    function fetchWeatherStatus(){
+         $('#WeatherTimestamp').text(getTimeStampNow());
+         $('#WeatherWarning').text("... looking ...");
+         $.getJSON("weatherStatus.json")
+         .done(function(j) {
+             console.log( "Weather status: " + JSON.stringify(j) );
+              $('#WeatherTimestamp').text(getTimeStampNow());
+              $('#WeatherWarning').text(j.status);
+         })
+         .fail(function(e) {
+              $('#WeatherTimestamp').text( getTimeStampNow() );
+              $('#WeatherWarning').text("unable to fetch weather status");
+              console.log( "error: " + e );
+         });
+    }
+
+    function getTimeStampNow() {
+        let d = new Date();
+        let formatter = Intl.DateTimeFormat(
+              "default", // a locale name; "default" chooses automatically
+              {
+                 weekday: "short",
+                 year: "numeric",
+                 month: "short",
+                 day: "numeric",
+                 hour: "numeric",
+                 minute: "numeric"
+                 }
+        );
+        return formatter.format(d);
+    }
+
+</script>
+</html>

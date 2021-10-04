@@ -11,8 +11,13 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="AsynchDemo" target="1.5" />
+      <module name="AsynchDemo" target="16" />
       <module name="SendReceive" target="16" />
     </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="SendReceive" options="-parameters" />
+    </option>
   </component>
 </project>
