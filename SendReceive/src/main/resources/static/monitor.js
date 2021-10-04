@@ -12,8 +12,6 @@ function subscribeHomeMonitor(topic, onMessageHandler){
     function onConnect() {
       // Once a connection has been made, make a subscription and send a message.
       console.log("onConnect, subscribe to " + topic);
-      topic = "home/thermostats";
-      console.log("onConnect, TODO remove hard coding subscribe to " + topic);
       client.subscribe(topic);
     };
 

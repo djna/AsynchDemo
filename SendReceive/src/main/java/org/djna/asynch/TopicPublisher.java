@@ -4,10 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.command.ActiveMQMessage;
+import org.apache.catalina.filters.RemoteIpFilter;
 import org.apache.log4j.Logger;
 import org.djna.asynch.homedata.ThermostatReading;
 
 import javax.jms.*;
+import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
 
 public class TopicPublisher {
@@ -18,8 +20,8 @@ public class TopicPublisher {
         LOGGER.error("Test Error");
         LOGGER.info("Starting");
         LOGGER.debug("debug message");
-        startWork(makePublisher("Hall"), false);
-        startWork(makePublisher("Basement"), false);
+        startWork(makePublisher("101","hall", 60), false);
+        startWork(makePublisher("101","basement", 25), false);
     }
 
     public static void startWork(Runnable runnable, boolean daemon) {
@@ -28,7 +30,7 @@ public class TopicPublisher {
         brokerThread.start();
     }
 
-    public static Runnable makePublisher(String location) {
+    public static Runnable makePublisher(String property, String location, final int frequencySeconds) {
         return new Runnable() {
             private ActiveMQConnectionFactory connectionFactory;
             private Connection connection;
@@ -38,8 +40,10 @@ public class TopicPublisher {
 
             private boolean stopping = false;
 
+
             @Override
             public void run() {
+
                 try {
                    connectionFactory
                             = new ActiveMQConnectionFactory("tcp://localhost:61616");
@@ -48,7 +52,9 @@ public class TopicPublisher {
                     session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
                     // in ActiceMQ this will create a topic if it doesn't exist
-                    destination = session.createTopic(baseTopic);
+                    String topic = MessageFormat.format(
+                            "{0}.{1}.{2}", baseTopic, property, location);
+                    destination = session.createTopic(topic);
 
                     // Create a MessageProducer from the Session to the Topic or Queue
                     producer = session.createProducer(destination);
@@ -56,12 +62,17 @@ public class TopicPublisher {
 
                     int baseTemperature = 17;
                     int temperatureSkew = 0;
+
+                    // TODO - add capability for clean shutdown
                     while (! stopping) {
                         publishTemperature(baseTemperature +temperatureSkew );
                         temperatureSkew++;
                         temperatureSkew %= 15;
 
-                        TimeUnit.SECONDS.sleep(20);
+                        // good citizen check
+                        int sleepFor =  frequencySeconds < 15 ? 15 : frequencySeconds;
+
+                        TimeUnit.SECONDS.sleep(sleepFor);
                     }
 
                     session.close();

@@ -28,7 +28,7 @@ public class TopicSubscriber {
                 connection.start();
                 connection.setExceptionListener(this);
                 Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-                Topic destination = session.createTopic("home.thermostats");
+                Topic destination = session.createTopic("home.thermostats.>");
                 MessageConsumer consumer = session.createDurableSubscriber(destination, "Thermostats");
 
                 System.out.println("Subscribed: " + destination);
