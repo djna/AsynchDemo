@@ -1,0 +1,28 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>EstateMonitor: Property</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="paho-mqtt.js"></script>
+
+
+</head>
+<body>
+<H1 th:text="'Monitoring, ' + ${property}" />
+
+<form action="/monitor" method="GET">
+    <input type="text" hidden="true" name="property"  th:value="${property}" />
+    <select name="locationSelected" id="locationSelection">
+        <th:block th:each="location : ${locations}">
+            <option th:text="${location}" />
+        </th:block>
+    </select>
+    <input type="submit" value="Monitor" >
+</form>
+
+</body>
+
+
+</html>

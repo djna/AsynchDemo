@@ -10,14 +10,10 @@
 
 </head>
 <body>
-<p th:text="'Monitoring, ' + ${location} + '!'" />
-<H2 id="LocationHall">Expecting Hall</H2>
-<p id="TimestampHall">No Updates</p>
-<p id="TemperatureHall">Unknown</p>
-
-<H2 id="LocationBasement">Expecting Basement</H2>
-<p id="TimestampBasement">No Updates</p>
-<p id="TemperatureBasement">Unknown</p>
+<H2 th:text="'Monitoring, ' + ${property} + ' ' + ${location} " />
+<input id="topic" type="text"  name="topic"  th:value="${topic}" />
+<p id="Timestamp">No Updates</p>
+<p id="Temperature">Unknown</p>
 
 </body>
 <script src="monitor.js"></script>
@@ -26,16 +22,17 @@
          console.log("Subscribing");
 
          // subscribe, requesting that message be delivered to function below
-         subscribeHomeMonitor(processMonitorMessage);
+         let topic = $('#topic').val();
+         console.log("Subscribe to " + topic);
+         subscribeHomeMonitor(topic, processMonitorMessage);
     });
 
     // Exmple message processor
     function processMonitorMessage(message){
          console.log("processMonitorMessage:"+message.payloadString);
          let telemetry = JSON.parse(message.payloadString);
-         $('#Location' + telemetry.location).text("Location: " + telemetry.location);
-         $('#Timestamp' + telemetry.location).text( getFormattedDate(telemetry.date));
-         $('#Temperature' + telemetry.location).text(telemetry.temperature);
+         $('#Timestamp').text( getFormattedDate(telemetry.date));
+         $('#Temperature').text(telemetry.temperature);
     }
 
     // Date formatter

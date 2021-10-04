@@ -1,5 +1,5 @@
 
-function subscribeHomeMonitor(onMessageHandler){
+function subscribeHomeMonitor(topic, onMessageHandler){
     client = new Paho.MQTT.Client("localhost", 61614, "BrowserClientId");
 
     client.onConnectionLost = onConnectionLost;
@@ -11,8 +11,10 @@ function subscribeHomeMonitor(onMessageHandler){
 
     function onConnect() {
       // Once a connection has been made, make a subscription and send a message.
-      console.log("onConnect");
-      client.subscribe("home/thermostats");
+      console.log("onConnect, subscribe to " + topic);
+      topic = "home/thermostats";
+      console.log("onConnect, TODO remove hard coding subscribe to " + topic);
+      client.subscribe(topic);
     };
 
     function onConnectionFailed(responseObject) {
